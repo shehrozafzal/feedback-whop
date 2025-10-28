@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-	title: "Whop App",
-	description: "My Whop App",
+	title: "Anonymous Feedback System",
+	description: "Collect and manage anonymous feedback for your Whop communities",
 };
 
 export default function RootLayout({

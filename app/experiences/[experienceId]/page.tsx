@@ -1,7 +1,8 @@
-import { Button } from "@whop/react/components";
+import { Button } from "@/components/ui/button";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
+import { FeedbackForm } from "@/components/FeedbackForm";
 
 export default async function ExperiencePage({
 	params,
@@ -21,40 +22,44 @@ export default async function ExperiencePage({
 
 	const displayName = user.name || `@${user.username}`;
 
+	// Check if user has admin access level
+	let isAdmin = false;
+	if ((access as any).access_level === 'admin') {
+		isAdmin = true;
+	} else if ((access as any).access_level === 'customer') {
+		isAdmin = false;
+	}
+
 	return (
 		<div className="flex flex-col p-8 gap-4">
 			<div className="flex justify-between items-center gap-4">
-				<h1 className="text-9">
+				<h1 className="text-6xl">
 					Hi <strong>{displayName}</strong>!
 				</h1>
-				<Link href="https://docs.whop.com/apps" target="_blank">
-					<Button variant="classic" className="w-full" size="3">
-						Developer Docs
-					</Button>
-				</Link>
+				<div className="flex gap-2">
+					{isAdmin && (
+						<Link href={`/dashboard/${experience.company.id}`}>
+							<Button variant="outline">
+								Admin Dashboard
+							</Button>
+						</Link>
+					)}
+				</div>
 			</div>
 
-			<p className="text-3 text-gray-10">
-				Welcome to you whop app! Replace this template with your own app. To
-				get you started, here's some helpful data you can fetch from whop.
+			<p className="text-lg text-muted-foreground">
+				Share your anonymous feedback and help improve this community experience.
 			</p>
 
-			<h3 className="text-6 font-bold">Experience data</h3>
-			<JsonViewer data={experience} />
-
-			<h3 className="text-6 font-bold">User data</h3>
-			<JsonViewer data={user} />
-
-			<h3 className="text-6 font-bold">Access data</h3>
-			<JsonViewer data={access} />
+			<FeedbackForm experienceId={experienceId} />
 		</div>
 	);
 }
 
 function JsonViewer({ data }: { data: any }) {
 	return (
-		<pre className="text-2 border border-gray-a4 rounded-lg p-4 bg-gray-a2 max-h-72 overflow-y-auto">
-			<code className="text-gray-10">{JSON.stringify(data, null, 2)}</code>
+		<pre className="text-sm border rounded-lg p-4 bg-muted max-h-72 overflow-y-auto">
+			<code className="text-muted-foreground">{JSON.stringify(data, null, 2)}</code>
 		</pre>
 	);
 }

@@ -7,5 +7,8 @@
 	"editor.codeActionsOnSave": {
 		"source.fixAll.biome": "explicit",
 		"source.action.useSortedKeys.biome": "explicit"
+	},
+	"[typescriptreact]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features"
 	}
 }
