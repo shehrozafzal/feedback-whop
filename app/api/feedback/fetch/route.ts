@@ -9,20 +9,35 @@ export async function GET(request: NextRequest) {
     const { userId } = await whopsdk.verifyUserToken(headersList)
     const { searchParams } = new URL(request.url)
     const companyId = searchParams.get('companyId')
+    const experienceId = searchParams.get('experienceId')
+    const visibility = searchParams.get('visibility') // 'visible', 'hidden', or null for all
 
-    if (!companyId) {
-      return NextResponse.json({ error: 'Missing companyId' }, { status: 400 })
+    if (!companyId && !experienceId) {
+      return NextResponse.json({ error: 'Missing companyId or experienceId' }, { status: 400 })
     }
 
-    // Get experiences for company
-    const experiences = await whopsdk.experiences.list({ company_id: companyId })
-    const experienceIds = experiences.data.map((e: any) => e.id)
+    let whereClause: any = {}
+
+    if (experienceId) {
+      // Fetch feedback for specific experience
+      whereClause.experienceId = experienceId
+    } else {
+      // Get experiences for company and fetch all feedback for those experiences
+      const experiences = await whopsdk.experiences.list({ company_id: companyId! })
+      const experienceIds = experiences.data.map((e: any) => e.id)
+      whereClause.experienceId = { in: experienceIds }
+    }
+
+    // Filter by visibility if specified
+    if (visibility === 'visible') {
+      whereClause.visible = true
+    } else if (visibility === 'hidden') {
+      whereClause.visible = false
+    }
 
     // Get feedbacks
     const feedbacks = await prisma.feedback.findMany({
-      where: {
-        experienceId: { in: experienceIds },
-      },
+      where: whereClause,
       orderBy: { createdAt: 'desc' },
     })
 

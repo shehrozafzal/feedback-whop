@@ -3,6 +3,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
 import { FeedbackForm } from "@/components/FeedbackForm";
+import { FeedbackDisplay } from "@/components/FeedbackDisplay";
 
 export default async function ExperiencePage({
 	params,
@@ -20,7 +21,7 @@ export default async function ExperiencePage({
 		whopsdk.users.checkAccess(experienceId, { id: userId }),
 	]);
 
-	const displayName = user.name || `@${user.username}`;
+	const displayName = `anonymous`;
 
 	// Check if user has admin access level
 	let isAdmin = false;
@@ -50,8 +51,9 @@ export default async function ExperiencePage({
 			<p className="text-lg text-muted-foreground">
 				Share your anonymous feedback and help improve this community experience.
 			</p>
-
 			<FeedbackForm experienceId={experienceId} />
+
+			<FeedbackDisplay experienceId={experienceId} />
 		</div>
 	);
 }

@@ -7,7 +7,7 @@ export async function POST(request: NextRequest) {
   try {
     const headersList = await headers()
     await whopsdk.verifyUserToken(headersList) // verify user
-    const { feedbackId, action } = await request.json()
+    const { feedbackId, action, sentiment } = await request.json()
 
     if (!feedbackId || !action) {
       return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
@@ -26,6 +26,14 @@ export async function POST(request: NextRequest) {
       await prisma.feedback.update({
         where: { id: feedbackId },
         data: { visible: true },
+      })
+    } else if (action === 'set-sentiment') {
+      if (!sentiment || !['positive', 'neutral', 'negative'].includes(sentiment)) {
+        return NextResponse.json({ error: 'Invalid sentiment' }, { status: 400 })
+      }
+      await prisma.feedback.update({
+        where: { id: feedbackId },
+        data: { sentiment },
       })
     } else {
       return NextResponse.json({ error: 'Invalid action' }, { status: 400 })

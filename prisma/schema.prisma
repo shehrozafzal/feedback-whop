@@ -13,6 +13,6 @@ model Feedback {
   userId       String
   content      String
   sentiment    String?  // optional (positive, neutral, negative)
-  visible      Boolean  @default(true)
+  visible      Boolean  @default(false)
   createdAt    DateTime @default(now())
 }

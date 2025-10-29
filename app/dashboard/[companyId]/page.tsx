@@ -1,8 +1,8 @@
-import { Button } from "@/components/ui/button";
 import { headers } from "next/headers";
 import Link from "next/link";
 import { whopsdk } from "@/lib/whop-sdk";
 import { FeedbackDashboard } from "@/components/FeedbackDashboard";
+import { BackButton } from "@/components/BackButton";
 
 export default async function DashboardPage({
 	params,
@@ -45,9 +45,11 @@ export default async function DashboardPage({
 	return (
 		<div className="flex flex-col p-8 gap-4">
 			<div className="flex justify-between items-center gap-4">
+				<BackButton />
 				<h1 className="text-6xl">
 					Hi <strong>{displayName}</strong>!
 				</h1>
+				<div></div> {/* Spacer for centering */}
 			</div>
 
 			<p className="text-lg text-muted-foreground">
