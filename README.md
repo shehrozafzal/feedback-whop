@@ -18,6 +18,20 @@ To run this project:
 
 5. Run `pnpm dev` to start the dev server. Then in the top right of the window find a translucent settings icon. Select "localhost". The default port 3000 should work.
 
+## Database Setup (Neon)
+
+This app uses PostgreSQL with Neon for production deployment on Vercel.
+
+1. Create a Neon account at [neon.tech](https://neon.tech)
+2. Create a new project and database
+3. Copy the connection string from your Neon dashboard
+4. Add the following environment variable to your `.env.local` and Vercel:
+   ```
+   DATABASE_URL="postgresql://username:password@hostname/database?sslmode=require"
+   ```
+5. Push the database schema: `pnpm db:push`
+6. Generate Prisma client: `pnpm db:generate`
+
 ## Deploying
 
 1. Upload your fork / copy of this template to github.
@@ -29,9 +43,10 @@ To run this project:
 ## Troubleshooting
 
 **App not loading properly?** Make sure to set the "App path" in your Whop developer dashboard. The placeholder text in the UI does not mean it's set - you must explicitly enter `/experiences/[experienceId]` (or your chosen path name)
-a
 
 **Make sure to add env.local** Make sure to get the real app environment vairables from your whop dashboard and set them in .env.local
+
+**Database connection issues?** Ensure your Neon DATABASE_URL is correctly set and includes `?sslmode=require` for SSL connections.
 
 
 For more info, see our docs at https://dev.whop.com/introduction
