@@ -10,9 +10,13 @@ datasource db {
 model Feedback {
   id           String   @id @default(cuid())
   experienceId String
+  companyId    String?  // Optional for now to support existing records
   userId       String
   content      String
   sentiment    String?  // optional (positive, neutral, negative)
   visible      Boolean  @default(false)
   createdAt    DateTime @default(now())
+  
+  @@index([companyId])
+  @@index([experienceId])
 }

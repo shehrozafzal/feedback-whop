@@ -10,30 +10,34 @@ export default async function DashboardPage({
 	params: Promise<{ companyId: string }>;
 }) {
 	const { companyId } = await params;
-	// Ensure the user is logged in on whop and has admin access.
+	// Ensure the user is logged in on whop
 	const headersList = await headers();
 	const { userId } = await whopsdk.verifyUserToken(headersList);
 
-	// Check admin access level for the company
+	console.log("Dashboard access attempt:", { companyId, userId });
+
+	// Check if the user has admin access to this company
 	let isAdmin = false;
 	try {
 		const access = await whopsdk.users.checkAccess(companyId, { id: userId });
-		if ((access as any).access_level === 'admin') {
-			isAdmin = true;
-		} else {
-			// Fallback: check company ownership
-			const company = await whopsdk.companies.retrieve(companyId);
-			isAdmin = (company as any).user_id === userId || (company as any).owner_id === userId;
-		}
+		console.log("Access check result:", access);
+
+		isAdmin = access.access_level === "admin";
 	} catch (error) {
-		isAdmin = false;
+		console.error("Error checking company access:", error);
+		return (
+			<div className="flex flex-col p-8 gap-4">
+				<h1 className="text-4xl font-bold">Error</h1>
+				<p>Unable to verify access permissions.</p>
+			</div>
+		);
 	}
 
 	if (!isAdmin) {
 		return (
 			<div className="flex flex-col p-8 gap-4">
 				<h1 className="text-4xl font-bold">Access Denied</h1>
-				<p>You must have admin access to view this dashboard.</p>
+				<p>Admin access is required to view this dashboard.</p>
 			</div>
 		);
 	}

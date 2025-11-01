@@ -11,8 +11,10 @@ export default async function ExperiencePage({
 	params: Promise<{ experienceId: string }>;
 }) {
 	const { experienceId } = await params;
+	console.log('1 Experience ID:', experienceId);
 	// Ensure the user is logged in on whop.
 	const { userId } = await whopsdk.verifyUserToken(await headers());
+	console.log('2 User ID:', userId);
 
 	// Fetch the neccessary data we want from whop.
 	const [experience, user, access] = await Promise.all([
@@ -22,6 +24,8 @@ export default async function ExperiencePage({
 	]);
 
 	const displayName = `anonymous`;
+	console.log('3 User Data:', user);
+	console.log('4 Experience Access:', access);
 
 	// Check if user has admin access level
 	let isAdmin = false;

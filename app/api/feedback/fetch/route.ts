@@ -4,46 +4,52 @@ import { prisma } from '@/lib/prisma'
 import { whopsdk } from '@/lib/whop-sdk'
 
 export async function GET(request: NextRequest) {
-  try {
-    const headersList = await headers()
-    const { userId } = await whopsdk.verifyUserToken(headersList)
-    const { searchParams } = new URL(request.url)
-    const companyId = searchParams.get('companyId')
-    const experienceId = searchParams.get('experienceId')
-    const visibility = searchParams.get('visibility') // 'visible', 'hidden', or null for all
+	try {
+		const headersList = await headers()
+		const { userId } = await whopsdk.verifyUserToken(headersList)
+		const { searchParams } = new URL(request.url)
+		const companyId = searchParams.get('companyId')
+		const experienceId = searchParams.get('experienceId')
+		const visibility = searchParams.get('visibility') // 'visible', 'hidden', or null for all
 
-    if (!companyId && !experienceId) {
-      return NextResponse.json({ error: 'Missing companyId or experienceId' }, { status: 400 })
-    }
+		console.log("Fetch request:", { companyId, experienceId, visibility })
 
-    let whereClause: any = {}
+		if (!companyId && !experienceId) {
+			return NextResponse.json({ error: 'Missing companyId or experienceId' }, { status: 400 })
+		}
 
-    if (experienceId) {
-      // Fetch feedback for specific experience
-      whereClause.experienceId = experienceId
-    } else {
-      // Get experiences for company and fetch all feedback for those experiences
-      const experiences = await whopsdk.experiences.list({ company_id: companyId! })
-      const experienceIds = experiences.data.map((e: any) => e.id)
-      whereClause.experienceId = { in: experienceIds }
-    }
+		let whereClause: any = {}
 
-    // Filter by visibility if specified
-    if (visibility === 'visible') {
-      whereClause.visible = true
-    } else if (visibility === 'hidden') {
-      whereClause.visible = false
-    }
+		if (companyId && !experienceId) {
+			// ADMIN VIEW: Fetch ALL feedback for this company (across all experiences)
+			console.log('Admin fetch: Getting all feedback for company:', companyId)
+			whereClause.companyId = companyId
+		} else if (experienceId) {
+			// MEMBER VIEW: Fetch feedback only for this specific experience
+			console.log('Member fetch: Getting feedback for experience:', experienceId)
+			whereClause.experienceId = experienceId
+		}
 
-    // Get feedbacks
-    const feedbacks = await prisma.feedback.findMany({
-      where: whereClause,
-      orderBy: { createdAt: 'desc' },
-    })
+		// Filter by visibility if specified
+		if (visibility === 'visible') {
+			whereClause.visible = true
+		} else if (visibility === 'hidden') {
+			whereClause.visible = false
+		}
 
-    return NextResponse.json({ feedbacks })
-  } catch (error) {
-    console.error(error)
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
-  }
+		console.log('Querying feedback with whereClause:', whereClause)
+
+		// Get feedbacks
+		const feedbacks = await prisma.feedback.findMany({
+			where: whereClause,
+			orderBy: { createdAt: 'desc' },
+		})
+
+		console.log('Fetched feedbacks count:', feedbacks.length)
+
+		return NextResponse.json({ feedbacks })
+	} catch (error) {
+		console.error('Fetch error:', error)
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+	}
 }
